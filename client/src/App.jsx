@@ -22,6 +22,7 @@ import {
   X,
 } from 'lucide-react';
 import { categoryLabel, languages, localeByLanguage, translate } from './i18n.js';
+import { createDemoData } from './demoData.js';
 
 const categories = [
   { id: 'food', label: 'Sakafo', color: '#db8c4c' },
@@ -50,6 +51,7 @@ const malagasyMonths = [
   'Desambra',
 ];
 const currentMonth = new Date().toISOString().slice(0, 7);
+const DEMO_ONLY = import.meta.env.VITE_DEMO_ONLY === 'true';
 
 async function api(path, options = {}) {
   const response = await fetch(`/api${path}`, {
@@ -123,8 +125,8 @@ function App() {
   });
   const t = (key, values) => translate(language, key, values);
   const [user, setUser] = useState(null);
-  const [demo, setDemo] = useState(false);
-  const [authLoading, setAuthLoading] = useState(true);
+  const [demo, setDemo] = useState(DEMO_ONLY);
+  const [authLoading, setAuthLoading] = useState(!DEMO_ONLY);
   const [authView, setAuthView] = useState('login');
   const [month, setMonth] = useState(currentMonth);
   const [dashboard, setDashboard] = useState(null);
@@ -151,6 +153,13 @@ function App() {
   }, [language]);
   const refresh = useCallback(async () => {
     if (demo) {
+      if (DEMO_ONLY) {
+        const data = createDemoData(month);
+        setDashboard(data);
+        setTransactions(data.transactions);
+        setError('');
+        return;
+      }
       setLoading(true);
       try {
         const data = await api(`/demo?month=${month}`);
@@ -181,6 +190,7 @@ function App() {
   }, [demo, month, user, language]);
 
   useEffect(() => {
+    if (DEMO_ONLY) return;
     api('/auth/me')
       .then(({ user: currentUser }) => setUser(currentUser))
       .catch(() => {})
@@ -418,7 +428,7 @@ function App() {
         <div className="page-wrap">
           {error && <div className="alert error-alert" role="alert">{error}<button onClick={() => setError('')} aria-label={t('Hidio')}><X size={16} /></button></div>}
           {notice && <div className="alert success-alert" role="status"><Check size={17} />{notice}</div>}
-          {demo && <div className="demo-banner"><Sparkles size={17} /><span><strong>{t('Mode démo.')}</strong> {t('Ireo tarehimarika aseho dia santionany noforonina, ary tsy azo ovaina.')}</span><button onClick={() => { setDemo(false); setDashboard(null); setTransactions([]); }}>{t('Hiditra / Hanokatra kaonty')} <ArrowRight size={15} /></button></div>}
+          {demo && <div className="demo-banner"><Sparkles size={17} /><span><strong>{t('Mode démo.')}</strong> {t('Ireo tarehimarika aseho dia santionany noforonina, ary tsy azo ovaina.')}</span>{!DEMO_ONLY && <button onClick={() => { setDemo(false); setDashboard(null); setTransactions([]); }}>{t('Hiditra / Hanokatra kaonty')} <ArrowRight size={15} /></button>}</div>}
 
           {activePage === 'overview' && (
             <Overview

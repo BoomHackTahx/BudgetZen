@@ -64,6 +64,21 @@ npm test
 npm run build
 ```
 
+## Publier la démo
+
+Le workflow GitHub Actions publie une version statique en lecture seule sur GitHub Pages. Cette version utilise uniquement les données fictives intégrées : elle ne nécessite ni serveur API, ni base de données, ni secret.
+
+Dans le dépôt GitHub, ouvre **Settings > Pages**, sélectionne **GitHub Actions** comme source de publication, puis laisse le workflow `Deploy BudgetZen demo` terminer. L’adresse de la démo apparaît dans **Settings > Pages** et dans l’environnement `github-pages` de l’exécution du workflow. Chaque push sur `main` republie la démo.
+
+La démo est servie sous `https://boomhacktahx.github.io/BudgetZen/`. Pour tester localement exactement cette version statique :
+
+```bash
+VITE_DEMO_ONLY=true VITE_BASE_PATH=/BudgetZen/ npm run build -w client
+npm run preview -w client
+```
+
+Le lancement normal avec `npm run dev` conserve les écrans de connexion et les routes API pour le développement local.
+
 ## À propos des données
 
 BudgetZen ne se connecte pas aux banques. N’utilise pas d’identifiants bancaires dans l’application. La démo publique doit rester basée sur les données fictives fournies ; les comptes et données réels nécessitent un hébergement et une base de données configurés de façon appropriée.
