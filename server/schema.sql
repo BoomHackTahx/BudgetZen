@@ -1,0 +1,32 @@
+CREATE TABLE IF NOT EXISTS users (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(80) NOT NULL,
+  email VARCHAR(254) NOT NULL UNIQUE,
+  password_hash VARCHAR(60) NOT NULL,
+  currency CHAR(3) NOT NULL DEFAULT 'MGA',
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS transactions (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  user_id BIGINT UNSIGNED NOT NULL,
+  type ENUM('income', 'expense') NOT NULL,
+  amount DECIMAL(16, 4) NOT NULL,
+  category VARCHAR(20) NOT NULL,
+  note VARCHAR(160) NOT NULL DEFAULT '',
+  transaction_date DATE NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_transactions_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  INDEX idx_transactions_user_date (user_id, transaction_date)
+);
+
+CREATE TABLE IF NOT EXISTS budgets (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  user_id BIGINT UNSIGNED NOT NULL,
+  category VARCHAR(20) NOT NULL,
+  budget_month CHAR(7) NOT NULL,
+  limit_amount DECIMAL(16, 4) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_budgets_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  UNIQUE KEY uq_budgets_user_category_month (user_id, category, budget_month)
+);
